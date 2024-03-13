@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Deterministic finite automata emulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Simulator for a deterministic finite automaton">
+    <meta name="author" content="traian">
+    <meta name="keywords" content="lfa, automaton, simulator">
+    <meta name="robots" content="index, follow">
+    <link rel="stylesheet" href="https://jdan.github.io/98.css/98.css">
+    <style>
+        body {
+            background-color: #222;
+        }
+        .centered {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .window-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input, .log, button {
+            width: 100%;
+            margin: 5px 0;
+        }
+        .log {
+            white-space: pre-line;
+            background-color: #f0f0f0;
+            border: 1px solid #000;
+            padding: 10px;
+            margin: 8px !important;
+            display: block; /* Ensures the log is visible even if empty */
+            min-height: 50px; /* Gives the log block a minimum height */
+        }
+        label {
+            text-align: center;
+            width: 100%;
+        }
+    </style>
+    <script>
+        let sigma = document.getElementById("sigma").value.split('\n');
+        let stari = document.getElementById("stari").value.split('\n');
+        let tranzitii = document.getElementById("tranzitii").value.split('\n').map(tr => tr.split(' '));
+        let inputSymbols = document.getElementById("inputSymbols").value.split(' ');
+        let log = document.getElementById("log");
+        
+        function updateArrays() {
+            sigma = document.getElementById("sigma").value.split('\n');
+            stari = document.getElementById("stari").value.split('\n');
+            tranzitii = document.getElementById("tranzitii").value.split('\n').map(tr => tr.split(' '));
+            inputSymbols = document.getElementById("inputSymbols").value.split(' ');
+        }
+
+        function simulateLFA() {
+            let sigma = document.getElementById("sigma").value.split('\n');
+            let stari = document.getElementById("stari").value.split('\n');
+            let tranzitii = document.getElementById("tranzitii").value.split('\n').map(tr => tr.split(' '));
+            let inputSymbols = document.getElementById("inputSymbols").value.split(' ');
+            let log = document.getElementById("log");
+
+            let currentState = stari.find(state => state.includes("start"));
+            if (!currentState) {
+                alert("No start state defined!");
+                return;
+            }
+            currentState = currentState.split(' ')[0];
+
+            let finalStates = stari.filter(state => state.includes("final")).map(state => state.split(' ')[0]);
+            let logText = `Start State: ${currentState}\n`;
+
+            for (let symbol of inputSymbols) {
+                let transition = tranzitii.find(tr => tr[0] === currentState && tr[1] === symbol);
+                if (!transition) {
+                    alert("No valid transition found for current configuration!");
+                    return;
+                }
+                logText += `${currentState} --${symbol}--> ${transition[2]}\n`;
+                currentState = transition[2];
+            }
+
+            logText += `End State: ${currentState}\n`;
+
+            if (finalStates.includes(currentState)) {
+                logText += "Result: YES";
+            } else {
+                logText += "Result: NO";
+            }
+            log.textContent = logText;
+        }
+
+        setInterval(() => {
+            updateArrays();
+        }, 50);
+    </script>
+</head>
+<body>
+    <div class="centered">
+        <div class="window" style="width: 600px;">
+            <div class="title-bar">
+                <div class="title-bar-text">Deterministic finite automata emulator</div>
+            </div>
+            <div class="window-body">
+                <label for="sigma">Sigma (one symbol per line):</label>
+                <textarea id="sigma" rows="4" class="input" oninput="updateArrays()"></textarea>
+                <label for="stari">Stari (mark "final" for final states, "start" for the initial state):</label>
+                <textarea id="stari" rows="4" class="input" oninput="updateArrays()"></textarea>
+                <label for="tranzitii">Tranzitii ([stateFrom] [symbol] [stateTo]):</label>
+                <textarea id="tranzitii" rows="4" class="input" oninput="updateArrays()"></textarea>
+                <label for="inputSymbols">Input Symbols (separated by space):</label>
+                <input type="text" id="inputSymbols" class="input" oninput="updateArrays()">
+                <button onclick="simulateLFA()">Run</button>
+                <div id="log" class="log">State transitions will appear here...</div>
+                <p>copyright <a href="https://tra1an.com/">traian</a> 2024</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
