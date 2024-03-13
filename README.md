@@ -3,8 +3,8 @@
 ## Overview
 Interactive web-based tools for simulating Deterministic and Non-Deterministic Finite Automata (DFA & NFA). Ideal for educators, students, and enthusiasts to explore automata theory, these emulators facilitate understanding through hands-on experimentation.
 
-### Open DFA emulator: [/dfa.html](./dfa.html)
-### Open NFA emulator: [/nfa.html](./nfa.html)
+### Open DFA emulator: [dfa emulator](https://plictisitor.github.io/dfa-nfa-emulators/dfa.html)
+### Open NFA emulator: [nfa emulator](https://plictisitor.github.io/dfa-nfa-emulators/nfa.html)
 
 ## How to use
 1. **Define Alphabet (Sigma):** Input symbols, one per line.
