@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Non-deterministic Finite Automata Emulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Simulator for a non-deterministic finite automaton">
+    <meta name="author" content="Traian">
+    <meta name="keywords" content="NFA, automaton, simulator, non-deterministic">
+    <meta name="robots" content="index, follow">
+    <link rel="stylesheet" href="https://unpkg.com/7.css@0.16.0/dist/7.css">
+    <style>
+        .window-body {
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="window" style="margin: 32px auto; max-width: 600px;">
+        <div class="title-bar">
+            <div class="title-bar-text">Non-deterministic Finite Automaton Emulator</div>
+        </div>
+        <div class="window-body">
+            <div class="field-row-stacked">
+                <label for="sigma">Sigma (one symbol per line):</label>
+                <textarea id="sigma" class="field"></textarea>
+            </div>
+            <div class="field-row-stacked">
+                <label for="stari">States (mark "final" for final states, "start" for the initial state):</label>
+                <textarea id="stari" class="field"></textarea>
+            </div>
+            <div class="field-row-stacked">
+                <label for="tranzitii">Transitions ([stateFrom] [symbol/E] [stateTo]):</label>
+                <textarea id="tranzitii" class="field"></textarea>
+            </div>
+            <div class="field-row-stacked">
+                <label for="inputSymbols">Input Symbols (separated by space):</label>
+                <input type="text" id="inputSymbols" class="field">
+            </div>
+            <div class="field-row" style="justify-content: flex-end;">
+                <button onclick="simulateNFA()">Run</button>
+            </div>
+            <div class="field-row" style="justify-content: flex-end;">
+                <button onclick="genPerm()">Generate all valid</button>
+            </div>
+            <div id="log" class="field-row" style="white-space: pre-wrap; border: 1px solid black; padding: 10px; margin-top: 10px; background-color: white; color: black;">
+                State transitions will appear here...
+            </div>
+            <p>copyright <a href="https://tra1an.com/">traian</a> 2024</p>
+        </div>
+    </div>
+
+    <script>
+        function simulateNFA() {
+            let sigma = document.getElementById("sigma").value.split('\n').map(s => s.trim()).filter(s => s);
+            let stari = document.getElementById("stari").value.split('\n').map(s => s.trim()).filter(s => s);
+            let tranzitiiRaw = document.getElementById("tranzitii").value.split('\n').map(s => s.trim()).filter(s => s);
+            let inputSymbols = document.getElementById("inputSymbols").value.split(' ').map(s => s.trim()).filter(s => s);
+            let log = document.getElementById("log");
+
+            let tranzitii = tranzitiiRaw.map(tr => {
+                let parts = tr.split(' ').map(p => p.trim());
+                return { from: parts[0], symbol: parts[1], to: parts[2] };
+            });
+
+            let startStates = stari.filter(state => state.includes("start")).map(state => state.split(' ')[0]);
+            let finalStates = stari.filter(state => state.includes("final")).map(state => state.split(' ')[0]);
+            let currentStates = [...startStates];
+            let logText = `Start States: ${currentStates.join(', ')}\n`;
+
+            for (let symbol of inputSymbols) {
+                let nextStates = [];
+                for (let currentState of currentStates) {
+                    nextStates = nextStates.concat(
+                        tranzitii
+                            .filter(tr => (tr.from === currentState && (tr.symbol === symbol || tr.symbol === 'E')))
+                            .map(tr => tr.to)
+                    );
+                }
+                currentStates = [...new Set(nextStates)]; // Remove duplicates
+                logText += `After symbol '${symbol}': ${currentStates.join(', ')}\n`;
+            }
+
+            let isAccepted = currentStates.some(state => finalStates.includes(state));
+            logText += `End States: ${currentStates.join(', ')}\n;`
+            logText += `Result: ${isAccepted ? "YES" : "NO"}`;
+            log.textContent = logText;
+        }
+
+        function genPerm() {
+            let sigma = document.getElementById("sigma").value.split('\n').map(s => s.trim()).filter(s => s);
+            let stari = document.getElementById("stari").value.split('\n').map(s => s.trim()).filter(s => s);
+            let tranzitiiRaw = document.getElementById("tranzitii").value.split('\n').map(s => s.trim()).filter(s => s);
+            let log = document.getElementById("log");
+
+            let tranzitii = tranzitiiRaw.map(tr => {
+                let parts = tr.split(' ');
+                return { from: parts[0], symbol: parts[1], to: parts[2] };
+            });
+
+            let startStates = stari.filter(state => state.includes("start")).map(state => state.split(' ')[0]);
+            let finalStates = stari.filter(state => state.includes("final")).map(state => state.split(' ')[0]);
+            
+            // Utility function to check if a given string is accepted by the NFA
+            function isAccepted(string) {
+                let currentStates = [...startStates];
+                for (let symbol of string) {
+                    let nextStates = [];
+                    for (let currentState of currentStates) {
+                        nextStates = nextStates.concat(
+                            tranzitii
+                                .filter(tr => (tr.from === currentState && (tr.symbol === symbol || tr.symbol === 'E')))
+                                .map(tr => tr.to)
+                        );
+                    }
+                    currentStates = [...new Set(nextStates)];
+                }
+                return currentStates.some(state => finalStates.includes(state));
+            }
+
+            // Generate permutations of input symbols up to a certain length
+            function generatePermutations(symbols, length, prefix = '') {
+                if (length === 0) {
+                    if (isAccepted(prefix)) {
+                        return [prefix];
+                    } else {
+                        return [];
+                    }
+                } else {
+                    let results = [];
+                    for (let symbol of symbols) {
+                        results = results.concat(generatePermutations(symbols, length - 1, prefix + symbol));
+                    }
+                    return results;
+                }
+            }
+
+            let maxLength = sigma.length; 
+            let acceptedStrings = [];
+            for (let length = 1; length <= maxLength; length++) {
+                acceptedStrings = acceptedStrings.concat(generatePermutations(sigma, length));
+            }
+
+            log.textContent = "Accepted Strings (up to length " + maxLength + "):\n" + acceptedStrings.join('\n');
+        }
+
+        // Remember to add a button or some trigger to call genAcceptedStrings function
+
+    </script>
+</body>
+</html>
