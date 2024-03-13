@@ -101,7 +101,6 @@
             let startStates = stari.filter(state => state.includes("start")).map(state => state.split(' ')[0]);
             let finalStates = stari.filter(state => state.includes("final")).map(state => state.split(' ')[0]);
             
-            // Utility function to check if a given string is accepted by the NFA
             function isAccepted(string) {
                 let currentStates = [...startStates];
                 for (let symbol of string) {
@@ -118,7 +117,6 @@
                 return currentStates.some(state => finalStates.includes(state));
             }
 
-            // Generate permutations of input symbols up to a certain length
             function generatePermutations(symbols, length, prefix = '') {
                 if (length === 0) {
                     if (isAccepted(prefix)) {
@@ -143,9 +141,6 @@
 
             log.textContent = "Accepted Strings (up to length " + maxLength + "):\n" + acceptedStrings.join('\n');
         }
-
-        // Remember to add a button or some trigger to call genAcceptedStrings function
-
     </script>
 </body>
 </html>
