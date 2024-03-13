@@ -1,7 +1,7 @@
 # DFA & NFA Emulators
 
-## Open DFA emulator: (/dfa.html)[./dfa.html]
-## Open NFA emulator: (/nfa.html)[./nfa.html]
+## Open DFA emulator: [/dfa.html](./dfa.html)
+## Open NFA emulator: [/nfa.html](./nfa.html)
 
 ## Overview
 Interactive web-based tools for simulating Deterministic and Non-Deterministic Finite Automata (DFA & NFA). Ideal for educators, students, and enthusiasts to explore automata theory, these emulators facilitate understanding through hands-on experimentation.
